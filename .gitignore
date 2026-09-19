@@ -1,0 +1,5 @@
+# Auto-generated runtime config — contains local IP, never commit
+python/config.json
+
+# Build cache
+.cache/

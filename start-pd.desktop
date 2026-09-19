@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Start PureData
+Comment=Launch Pure Data with main.pd and Bluetooth audio
+Exec=bash -c 'DIR=$(dirname "$(readlink -f "%k")"); xfce4-terminal --title="Pure Data" --command="bash \"$DIR/start-pd.sh\""'
+Icon=pd
+Terminal=false
+Categories=AudioVideo;

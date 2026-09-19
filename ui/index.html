@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Modulino → PD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f1117; --surface: #1c1f2a; --border: #2e3244;
+      --accent: #4fa3e0; --text: #e2e8f0; --muted: #8892a4;
+      --green: #22c55e; --red: #ef4444; --yellow: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text);
+           padding: 1.2rem; font-size: 14px; line-height: 1.5; }
+    h2 { font-size: 11px; margin-bottom: 10px; color: var(--muted);
+         text-transform: uppercase; letter-spacing: .07em; }
+    section { background: var(--surface); border: 1px solid var(--border);
+              border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
+
+    /* device grid */
+    #devices { display: flex; flex-wrap: wrap; gap: 10px; }
+    .card { background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px 12px; min-width: 155px; }
+    .card.unknown { border-color: var(--yellow); }
+    .card-title { font-weight: 600; font-size: 13px; margin-bottom: 6px;
+                  display: flex; gap: 6px; align-items: center; }
+    .card-addr { font-size: 11px; color: var(--muted); font-family: monospace; }
+    .kv { display: flex; gap: 6px; align-items: baseline; margin: 2px 0; font-size: 13px; }
+    .kv-key { color: var(--muted); min-width: 52px; font-size: 12px; }
+    .kv-val { font-family: monospace; }
+    .no-devices { color: var(--muted); font-size: 13px; }
+
+    /* unknown device config row */
+    .config-row { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .config-row input[type=text] {
+      background: var(--surface); color: var(--text); border: 1px solid var(--border);
+      border-radius: 5px; padding: 4px 8px; font-size: 12px; width: 100%; }
+    .config-row input[type=text]:focus { outline: none; border-color: var(--accent); }
+    .config-row select {
+      background: var(--surface); color: var(--text); border: 1px solid var(--border);
+      border-radius: 5px; padding: 4px 6px; font-size: 12px; width: 100%; }
+    .config-row button {
+      padding: 4px 10px; border: 1px solid var(--accent); border-radius: 5px;
+      background: var(--accent); color: #000; cursor: pointer; font-size: 12px;
+      font-weight: 600; }
+    .config-row button:hover { opacity: 0.85; }
+    .config-row label { font-size: 11px; color: var(--muted); margin-bottom: 1px; }
+
+    /* UDP config */
+    .field-label { display: block; margin: 6px 0 2px; color: var(--muted); font-size: 12px; }
+    input[type=text].cfg, input[type=number].cfg {
+      background: var(--bg); color: var(--text); border: 1px solid var(--border);
+      border-radius: 5px; padding: 4px 8px; font-size: 13px; width: 180px; }
+    input[type=checkbox] { accent-color: var(--accent); }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    button.save { padding: 5px 14px; border: 1px solid var(--accent); border-radius: 5px;
+                  background: var(--accent); color: #000; cursor: pointer; font-size: 13px;
+                  font-weight: 600; margin-top: 8px; }
+    button.save:hover { opacity: 0.85; }
+    button.plain { padding: 5px 12px; border: 1px solid var(--border); border-radius: 5px;
+                   background: var(--surface); color: var(--text); cursor: pointer; font-size: 13px; }
+    button.plain:hover { background: var(--border); }
+    #status { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .ok { color: var(--green); } .err { color: var(--red); }
+    input.cfg:disabled { opacity: 0.55; cursor: not-allowed; }
+    .hint { font-size: 11px; color: var(--muted); max-width: 260px; margin-top: 2px; }
+    .hint code { background: var(--bg); border: 1px solid var(--border); border-radius: 3px;
+                 padding: 0 4px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div id="status">Loading…</div>
+
+  <section>
+    <h2>Live Device Values</h2>
+    <div id="devices"><span class="no-devices">Scanning…</span></div>
+    <button class="plain" id="rescan-btn" style="margin-top:10px">↺ Rescan I²C</button>
+  </section>
+
+  <section>
+    <h2>UDP Output</h2>
+    <div class="row">
+      <div>
+        <label class="field-label"><input id="udp-enabled" type="checkbox" checked> Enable UDP</label>
+        <label class="field-label">Host <input id="udp-host" type="text" class="cfg" value="172.17.0.1"></label>
+        <label class="field-label">Port <input id="udp-port" type="number" class="cfg" value="9999" disabled></label>
+        <div class="hint">Port is fixed in <code>python/config.json</code> — edit that file and restart the app to change it.</div>
+        <button class="save" id="save-btn">Save</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+  const api = (method, path, body) => fetch(path, {
+    method, cache: 'no-store',
+    headers: body ? {'Content-Type':'application/json'} : undefined,
+    body:    body ? JSON.stringify(body) : undefined,
+  }).then(r => r.json()).catch(() => null);
+
+  const STATUS  = document.getElementById('status');
+  const DEVICES = document.getElementById('devices');
+
+  function setStatus(msg, cls) {
+    STATUS.innerHTML = `<span class="${cls||''}">${msg}</span>`;
+  }
+
+  const TYPE_ICON = {
+    buttons:'🔘', joystick:'🕹️', knob:'🎚️', distance:'📏', movement:'📐', unknown:'❓'
+  };
+  const DEVICE_TYPES = ['buttons', 'joystick', 'knob', 'distance', 'movement'];
+
+  function deviceFields(d) {
+    const skip = new Set(['type', 'addr']);
+    return Object.entries(d).filter(([k]) => !skip.has(k));
+  }
+
+  function fmtVal(v) {
+    if (v === true)  return '▼ pressed';
+    if (v === false) return '○ open';
+    if (typeof v === 'number') return Number.isInteger(v) ? String(v) : v.toFixed(2);
+    return String(v);
+  }
+
+  // Build the assign+keyword row for unknown devices
+  function buildConfigRow(addrInt, currentPrefix) {
+    const wrap = document.createElement('div');
+    wrap.className = 'config-row';
+
+    const kwLabel = document.createElement('label');
+    kwLabel.textContent = 'UDP keyword (optional)';
+    const kwInput = document.createElement('input');
+    kwInput.type = 'text';
+    kwInput.placeholder = 'e.g. wave, ctrl, sensor…';
+    kwInput.value = currentPrefix || '';
+
+    const typeLabel = document.createElement('label');
+    typeLabel.textContent = 'Device type';
+    const sel = document.createElement('select');
+    DEVICE_TYPES.forEach(tp => {
+      const o = document.createElement('option');
+      o.value = tp;
+      o.textContent = tp.charAt(0).toUpperCase() + tp.slice(1);
+      sel.appendChild(o);
+    });
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Configure';
+    btn.onclick = async () => {
+      const res = await api('POST', '/api/devices', {
+        addr:   addrInt,
+        type:   sel.value,
+        prefix: kwInput.value.trim() || null,
+      });
+      setStatus(res?.ok ? `Configured 0x${addrInt.toString(16)} as ${sel.value}.` : 'Configure failed.',
+                res?.ok ? 'ok' : 'err');
+    };
+
+    wrap.appendChild(kwLabel);
+    wrap.appendChild(kwInput);
+    wrap.appendChild(typeLabel);
+    wrap.appendChild(sel);
+    wrap.appendChild(btn);
+    return wrap;
+  }
+
+  let _prefixes = {};
+
+  function renderDevices(deviceMap) {
+    const entries = Object.entries(deviceMap);
+    if (entries.length === 0) {
+      // Only show "no devices" if there are currently no cards in the DOM
+      if (!DEVICES.querySelector('.card')) {
+        DEVICES.innerHTML = '<span class="no-devices">No devices found.</span>';
+      }
+      return;
+    }
+
+    // Clear the "no devices" / "Scanning" placeholder once real cards appear
+    const placeholder = DEVICES.querySelector('span.no-devices');
+    if (placeholder) placeholder.remove();
+
+    const existing = {};
+    DEVICES.querySelectorAll('.card').forEach(c => { existing[c.dataset.key] = c; });
+
+    const seen = new Set();
+    entries.forEach(([key, d]) => {
+      seen.add(key);
+      const addrHex = '0x' + (d.addr || 0).toString(16).padStart(2, '0');
+      const icon    = TYPE_ICON[d.type] || '❓';
+      const isUnknown = d.type === 'unknown';
+      const prefix  = _prefixes[key];
+
+      let card = existing[key];
+      const isNew = !card;
+      if (isNew) {
+        card = document.createElement('div');
+        card.dataset.key = key;
+        DEVICES.appendChild(card);
+      }
+
+      card.className = 'card' + (isUnknown ? ' unknown' : '');
+
+      // Title (only rebuild if new to avoid wiping the config-row inputs)
+      if (isNew) {
+        const title = document.createElement('div');
+        title.className = 'card-title';
+        title.innerHTML =
+          `<span>${icon} ${d.type || '?'}</span>` +
+          `<span class="card-addr">${addrHex}</span>`;
+        card.appendChild(title);
+
+        const vals = document.createElement('div');
+        vals.className = 'card-values';
+        card.appendChild(vals);
+
+        if (isUnknown) {
+          card.appendChild(buildConfigRow(d.addr, prefix));
+        }
+      }
+
+      // Update live values (never touch the config-row once built)
+      const fields = deviceFields(d);
+      const valsEl = card.querySelector('.card-values');
+      if (valsEl) {
+        valsEl.innerHTML = fields.map(([k, v]) =>
+          `<div class="kv"><span class="kv-key">${k}</span>` +
+          `<span class="kv-val">${fmtVal(v)}</span></div>`
+        ).join('');
+      }
+    });
+
+    // Remove cards for devices no longer present
+    Object.keys(existing).forEach(k => { if (!seen.has(k)) existing[k].remove(); });
+  }
+
+  let _lastDevices = {};
+
+  async function pollState() {
+    const data = await api('GET', '/api/state');
+    if (!data || !data.ok) return;
+
+    if (data.config) {
+      const cfgIds = ['udp-host', 'udp-enabled'];
+      const anyFocused = cfgIds.some(id => document.getElementById(id) === document.activeElement);
+      if (!anyFocused) {
+        document.getElementById('udp-host').value      = data.config.udpHost;
+        document.getElementById('udp-port').value      = data.config.udpPort;
+        document.getElementById('udp-enabled').checked = data.config.udpEnabled;
+      }
+    }
+    if (data.prefixes) _prefixes = data.prefixes;
+    if (data.devices) {
+      _lastDevices = data.devices;
+      renderDevices(_lastDevices);
+    }
+  }
+
+  document.getElementById('save-btn').addEventListener('click', async () => {
+    const res = await api('POST', '/api/config', {
+      udpHost:    document.getElementById('udp-host').value.trim(),
+      udpEnabled: document.getElementById('udp-enabled').checked,
+    });
+    setStatus(res?.ok ? 'Saved.' : 'Save failed.', res?.ok ? 'ok' : 'err');
+  });
+
+  document.getElementById('rescan-btn').addEventListener('click', async () => {
+    setStatus('Rescanning…');
+    await api('POST', '/api/rescan');
+    setTimeout(pollState, 1200);
+  });
+
+  (async function init() {
+    // Single rescan at startup so the Arduino fires all device_found / device_unknown events.
+    // We wait 2 s before the first poll to give the Bridge time to process those events.
+    setStatus('Scanning devices…');
+    await api('POST', '/api/rescan');
+    await new Promise(r => setTimeout(r, 2000));
+    await pollState();
+    setStatus('Live — polling every 300 ms', 'ok');
+    setInterval(pollState, 300);
+  })();
+  </script>
+</body>
+</html>

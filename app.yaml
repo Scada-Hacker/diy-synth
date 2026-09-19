@@ -1,0 +1,6 @@
+name: DIY Synth
+description: Streams live Modulino sensor values to Pure Data via UDP
+ports: []
+bricks:
+- arduino:web_ui: {}
+icon: 🎛️
