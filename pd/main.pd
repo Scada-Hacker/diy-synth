@@ -14,11 +14,11 @@
 #X obj 640 210 cnv 1 320 110 empty empty empty 8 8 0 12 #e9e4d8 #303030 0;
 #X text 650 216 MASTER;
 #X text 650 242 volume;
-#X obj 650 252 hsl 200 18 0 1 0 1 master_vol master_vol_set empty -2 -8 0 10 #f4f1ea #1c1c1c #303030 0.7 1;
+#X obj 650 252 hsl 200 18 0 1 0 1 master_vol master_vol_set empty -2 -8 0 10 #f4f1ea #1c1c1c #303030 0.6 1;
 #X obj 640 340 fx;
 #N canvas 120 120 560 380 master 0;
 #X obj 30 24 loadbang;
-#X msg 30 48 \; master_vol 0.7 \; master_vol_set 0.7;
+#X msg 30 48 \; master_vol 0.6 \; master_vol_set 0.6;
 #X msg 30 72 \; master_filter 0.5;
 #X obj 30 120 catch~ mix;
 #X obj 200 120 r master_vol;
