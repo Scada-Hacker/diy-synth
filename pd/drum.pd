@@ -105,7 +105,7 @@
 #X msg 200 340 1 2 \, 0 150 2;
 #X obj 200 364 vline~;
 #X obj 20 412 *~;
-#X obj 20 436 *~ 0.6;
+#X obj 20 436 *~ 0.5;
 #X obj 20 460 throw~ drumbus;
 #X obj 280 340 noise~;
 #X obj 280 364 hip~ 7000;
@@ -169,7 +169,7 @@
 #X obj 700 378 *~;
 #X obj 700 402 *~ 0.25;
 #X obj 470 426 +~;
-#X obj 470 450 *~ 0.6;
+#X obj 470 450 *~ 0.5;
 #X obj 470 474 throw~ drumbus;
 #X connect 44 0 45 0;
 #X connect 10 0 46 0;
