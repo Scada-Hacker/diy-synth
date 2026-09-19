@@ -1,6 +1,6 @@
 #N canvas 60 60 980 720 10;
 #X text 20 14 UNO Q  +  MODULINO  ACID SYNTH;
-#X text 20 30 Turn DSP on \, press play. Mouse: click the step grids + sliders. Hardware: knob = tempo / play \, buttons = mute snare / hat / synth \, distance = transpose \, tilt X = cutoff \, tilt Y = resonance \, shake = fill.;
+#X text 20 30 Turn DSP on \, press play. Mouse: click the step grids + sliders. Hardware: knob = tempo / play \, buttons = mute snare / hat / synth \, distance = transpose \, tilt X = cutoff \, tilt Y = resonance \, shake = fill. Joystick click randomises the bass pattern.;
 #X obj 20 60 cnv 1 150 60 empty empty empty 8 8 0 12 #e9e4d8 #303030 0;
 #X obj 30 82 tgl 28 0 empty empty empty 0 -6 0 8 #e8643c #ffffff #303030 0 1;
 #X text 66 90 AUDIO ON;
@@ -9,12 +9,13 @@
 #X msg 120 144 \; pd dsp 0;
 #X obj 20 160 transport;
 #X obj 20 270 drum;
-#X obj 20 370 synth;
+#X obj 20 410 synth;
 #X obj 640 60 udp_io;
 #X obj 640 210 cnv 1 320 110 empty empty empty 8 8 0 12 #e9e4d8 #303030 0;
 #X text 650 216 MASTER;
 #X text 650 242 volume;
 #X obj 650 252 hsl 200 18 0 1 0 1 master_vol master_vol_set empty -2 -8 0 10 #f4f1ea #1c1c1c #303030 0.7 1;
+#X obj 640 340 fx;
 #N canvas 120 120 560 380 master 0;
 #X obj 30 24 loadbang;
 #X msg 30 48 \; master_vol 0.7 \; master_vol_set 0.7;

@@ -1,5 +1,5 @@
 #N canvas 60 60 640 640 10;
-#X obj 0 0 cnv 1 250 132 empty empty empty 8 8 0 12 #e9e4d8 #303030 0;
+#X obj 0 0 cnv 1 250 148 empty empty empty 8 8 0 12 #e9e4d8 #303030 0;
 #X text 10 6 MODULINO UDP IN;
 #X obj 14 26 bng 22 250 50 0 empty empty empty 17 7 0 10 #9ad29a #1c1c1c #303030;
 #X text 46 32 packets in   UDP 7400;
@@ -12,7 +12,7 @@
 #X obj 400 200 loadbang;
 #X msg 400 224 \; shake_thresh 1.6;
 #X obj 14 160 netreceive 7400 1;
-#X obj 14 190 route btn knob dist move;
+#X obj 14 190 route btn knob dist move joy;
 #X obj 200 160 spigot;
 #X obj 200 184 print UDP;
 #X obj 14 220 unpack f f f f;
@@ -48,6 +48,10 @@
 #X obj 330 548 change;
 #X obj 330 572 sel 1;
 #X obj 330 596 s fill_trigger;
+#X obj 500 220 unpack f f f f;
+#X obj 500 244 sel 1;
+#X obj 500 268 s rand_bang;
+#X text 10 122 joystick click = randomise bass;
 #X connect 10 0 11 0;
 #X connect 12 0 2 0;
 #X connect 12 0 13 0;
@@ -92,4 +96,7 @@
 #X connect 44 0 46 0;
 #X connect 46 0 47 0;
 #X connect 47 0 48 0;
-#X coords 0 -1 1 1 250 132 1 0 0;
+#X connect 13 4 49 0;
+#X connect 49 3 50 0;
+#X connect 50 0 51 0;
+#X coords 0 -1 1 1 250 148 1 0 0;
