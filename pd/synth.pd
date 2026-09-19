@@ -94,14 +94,14 @@
 #X text 8 180 accent;
 #X obj 56 176 hsl 150 15 0 1.5 0 0 empty accent_amt empty -2 -8 0 10 #f4f1ea #1c1c1c #303030 0.6 1;
 #X text 230 180 level;
-#X obj 300 176 hsl 150 15 0 1 0 0 empty synth_vol empty -2 -8 0 10 #f4f1ea #1c1c1c #303030 0.5 1;
+#X obj 300 176 hsl 150 15 0 1 0 0 empty synth_vol empty -2 -8 0 10 #f4f1ea #1c1c1c #303030 0.4 1;
 #X text 8 200 dist limit;
 #X obj 74 194 nbx 4 15 40 400 0 0 empty dist_thresh empty 0 -8 0 9 #f4f1ea #1c1c1c #303030 345 256;
 #X text 124 200 mm   (out of range = back to root);
 #X obj 700 350 loadbang;
 #X msg 700 374 \; cutoff_set 900 \; synth_reso 12;
 #X msg 700 398 \; env_mod 2600 \; filt_decay 260;
-#X msg 700 422 \; accent_amt 0.6 \; synth_vol 0.5;
+#X msg 700 422 \; accent_amt 0.6 \; synth_vol 0.4;
 #X msg 700 446 \; dist_thresh 345 \; dist_range 12 \; transpose 0;
 #X obj 700 512 list trim;
 #X obj 700 534 s seq_note;
