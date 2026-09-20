@@ -21,7 +21,7 @@
 #X obj 134 246 sel 1;
 #X obj 134 270 s mute_hat;
 #X obj 254 246 sel 1;
-#X obj 254 270 s mute_synth;
+#X obj 254 270 s mute_kick;
 #X obj 14 310 unpack f f f;
 #X obj 14 334 sel 0;
 #X obj 14 358 * 2;

@@ -2,7 +2,7 @@
 # Modulino UDP Bridge — routes every Modulino sensor event to Pure Data via UDP.
 #
 # Message formats sent to PD's [netreceive <port> 1]:
-#   btn  <addr> <b1> <b2> <b3>   — press (0→1) toggles mute: snare / hat / synth
+#   btn  <addr> <b1> <b2> <b3>   — press (0→1) toggles mute: snare / hat / kick
 #   knob <addr> <delta> <press>  — delta (−1/0/1) nudges tempo ±2 BPM; press toggles play/stop
 #   dist <addr> <mm>             — transposes the whole 303 pattern ±12 semitones
 #                                  (past ~345 mm the pattern returns to its root)

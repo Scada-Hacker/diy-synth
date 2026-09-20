@@ -11,7 +11,7 @@ configures the target address.
 ## Hardware required
 
 - **Arduino UNO Q** — runs the sketch and the Python bridge side-by-side
-- **Modulino Buttons** *(optional)* — 3 tactile buttons (mute snare / hat / synth)
+- **Modulino Buttons** *(optional)* — 3 tactile buttons (mute snare / hat / kick)
 - **Modulino Joystick** *(optional)* — analog stick with click; **click randomises the bass pattern**
 - **Modulino Knob** *(optional)* — rotary encoder with push button
 - **Modulino Distance** *(optional)* — ToF distance sensor (mm); transposes the whole pattern
@@ -42,7 +42,7 @@ I²C address, followed by the sensor values:
 
 | Type | Format | Example | Patch does |
 |------|--------|---------|------------|
-| Buttons | `btn <addr> <b0> <b1> <b2>` | `btn 62 1 0 0` | mute snare / hat / synth |
+| Buttons | `btn <addr> <b0> <b1> <b2>` | `btn 62 1 0 0` | mute snare / hat / kick |
 | Joystick | `joy <addr> <nx> <ny> <pressed>` | `joy 44 0.500 -0.300 0` | click = randomise bass pattern |
 | Knob | `knob <addr> <delta> <pressed>` | `knob 59 1 0` | tempo ±2 BPM / play-stop |
 | Distance | `dist <addr> <mm>` | `dist 41 352.0` | transpose the pattern |
@@ -120,10 +120,10 @@ Changing the tempo retunes the delay automatically.
 | Movement tilt Y | Filter resonance, 1–25 |
 | Movement shake | Snare fill (threshold in `g`, edge-triggered) |
 | Knob turn / press | Tempo ±2 BPM / play-stop |
-| Buttons 1-2-3 | Mute snare / hat / synth |
+| Buttons 1-2-3 | Mute snare / hat / kick |
 | Joystick click | Randomise the bass pattern |
 
-The Modulino Buttons board only has three buttons, so the **kick mute and the FX send toggles
+The Modulino Buttons board only has three buttons, so the **synth mute and the FX send toggles
 are mouse-only**.
 
 Everything is also clickable with the mouse, so the patch is fully playable with no hardware attached.
